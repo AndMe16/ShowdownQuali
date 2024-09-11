@@ -62,7 +62,7 @@ public class GameEventsManager{
         ModLogger.LogInfo("Lobby list got updated");
         if(gotDisconnected&&LobbiesManager.ShowdownStarted){
             if(createNewLobby){
-                ZeepkistNetwork.CreateLobby(LobbiesManager.lobbyName,LobbiesManager.lobbyMaxPlayers,true);
+                ZeepkistNetwork.CreateLobby(Plugin.modConfig.lobbyName.Value,Plugin.modConfig.lobbyMaxPlayers.Value,true);
             }
             else{
                 LobbiesManager.RejoinLobby();
@@ -89,6 +89,7 @@ public class GameEventsManager{
         if (ZeepkistNetwork.LocalPlayerHasHostPowers()&&LobbiesManager.ShowdownStarted&&LobbiesManager.PlaylistSet){
             LobbiesManager.PlaylistSet = false;
             if(!LobbiesManager.ShowDownResume){
+                LobbiesManager.ChangeLobbyName(); 
                 LobbiesManager.JoinMessage();
                 LobbiesManager.LobbyTime();
                 ResetLobbyTimerManager.StartDailyTimer();
@@ -96,6 +97,7 @@ public class GameEventsManager{
             }
             else{
                 LobbiesManager.ShowDownResume = false;
+                LobbiesManager.ChangeLobbyName(); 
                 LobbiesManager.JoinMessage();
                 double remainingTime = ResetLobbyTimerManager.RemainingTime;
                 int newLobbyTime = (int)(remainingTime / 1000) + (60*10); 

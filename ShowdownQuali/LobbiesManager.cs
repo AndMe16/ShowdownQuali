@@ -20,8 +20,6 @@ public class LobbiesManager{
 
     // Lobby Info
     private static string lobbyID;
-    public static readonly string lobbyName = "Showdown Qualifiers! TEST DONT ENTER"; // Change It!
-    public static readonly int lobbyMaxPlayers = 64; // Change It!
     public static string LobbyID
     {
         get { return lobbyID; }
@@ -76,7 +74,7 @@ public class LobbiesManager{
             }
         }
         ModLogger.LogInfo("Couldn't find the previous lobby :( Creating a new one!");
-        ZeepkistNetwork.CreateLobby(lobbyName,lobbyMaxPlayers,true);
+        ZeepkistNetwork.CreateLobby(Plugin.modConfig.lobbyName.Value,Plugin.modConfig.lobbyMaxPlayers.Value,true);
     }
 
     public static void OnShowdownEnded(){
@@ -94,6 +92,7 @@ public class LobbiesManager{
             CommandSenderManager.SkipNextLevel();
         }
         else{
+            ChangeLobbyName(); 
             JoinMessage();
             LobbyTime();
             ResetLobbyTimerManager.StartDailyTimer();
@@ -117,6 +116,7 @@ public class LobbiesManager{
         }
         else{
             ShowDownResume = false;
+            ChangeLobbyName(); 
             JoinMessage();
             double remainingTime = ResetLobbyTimerManager.RemainingTime;
             int newLobbyTime = (int)(remainingTime / 1000) + (60*10); 
@@ -125,5 +125,14 @@ public class LobbiesManager{
             ResetLobbyTimerManager.ResumeDailyTimer();
         }
     }
+
+    public static void ChangeLobbyName(){
+        ZeepkistNetwork.CurrentLobby.Name = Plugin.modConfig.lobbyName.Value;
+        ZeepkistNetwork.LobbyNameChanged();
+        ZeepkistNetwork.CurrentLobby.MaxPlayerCount = Plugin.modConfig.lobbyMaxPlayers.Value;
+        ZeepkistNetwork.LobbyMaxPlayersChanged();
+        ZeepkistNetwork.CurrentLobby.IsPublic = true;
+        ZeepkistNetwork.LobbyVisibilityChanged();
+    } 
     
 }

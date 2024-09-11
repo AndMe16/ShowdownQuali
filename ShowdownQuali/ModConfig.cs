@@ -6,6 +6,8 @@ public class ModConfig
 {
     public ConfigEntry<int> qualifierDuration;
     public ConfigEntry<string> qualiPlaylistName;
+    public ConfigEntry<string> lobbyName;
+    public ConfigEntry<int> lobbyMaxPlayers;
 
     private event EventHandler<SettingChangedEventArgs> OnSettingChanged;
 
@@ -16,6 +18,10 @@ public class ModConfig
                                     new ConfigDescription("Set a custom duration of the event", new AcceptableValueRange<int>(2400, 172800)));
 
         qualiPlaylistName = config.Bind("Qualifier Level", "Playlist Name", "ShowdownS4QualiPlaylist","Set the playlist name that contains the qualifier track");
+
+        lobbyName         = config.Bind("Lobby", "Lobby Name", "Showdown Season 4 Qualifiers","Set the lobby name");
+
+        lobbyMaxPlayers   = config.Bind("Lobby", "Lobby Max. Players", 64, new ConfigDescription("Set the lobby max. players", new AcceptableValueRange<int>(2, 64)));
 
         qualifierDuration.SettingChanged += SettingChangedHandler;
         qualiPlaylistName.SettingChanged += SettingChangedHandler;
