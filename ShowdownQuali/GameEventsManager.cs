@@ -89,7 +89,7 @@ public class GameEventsManager{
         if (ZeepkistNetwork.LocalPlayerHasHostPowers()&&LobbiesManager.ShowdownStarted&&LobbiesManager.PlaylistSet){
             LobbiesManager.PlaylistSet = false;
             if(!LobbiesManager.ShowDownResume){
-                LobbiesManager.ChangeLobbyName(); 
+                LobbiesManager.ChangeLobbyInfo(); 
                 LobbiesManager.JoinMessage();
                 LobbiesManager.LobbyTime();
                 ResetLobbyTimerManager.StartDailyTimer();
@@ -97,7 +97,7 @@ public class GameEventsManager{
             }
             else{
                 LobbiesManager.ShowDownResume = false;
-                LobbiesManager.ChangeLobbyName(); 
+                LobbiesManager.ChangeLobbyInfo(); 
                 LobbiesManager.JoinMessage();
                 double remainingTime = ResetLobbyTimerManager.RemainingTime;
                 int newLobbyTime = (int)(remainingTime / 1000) + (60*10); 

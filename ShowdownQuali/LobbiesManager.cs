@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using ShowdownQuali;
 using UnityEngine;
 using ZeepkistClient;
+using ZeepkistNetworking;
 
 public class LobbiesManager{
 
@@ -92,7 +94,7 @@ public class LobbiesManager{
             CommandSenderManager.SkipNextLevel();
         }
         else{
-            ChangeLobbyName(); 
+            ChangeLobbyInfo(); 
             JoinMessage();
             LobbyTime();
             ResetLobbyTimerManager.StartDailyTimer();
@@ -116,7 +118,7 @@ public class LobbiesManager{
         }
         else{
             ShowDownResume = false;
-            ChangeLobbyName(); 
+            ChangeLobbyInfo(); 
             JoinMessage();
             double remainingTime = ResetLobbyTimerManager.RemainingTime;
             int newLobbyTime = (int)(remainingTime / 1000) + (60*10); 
@@ -126,13 +128,54 @@ public class LobbiesManager{
         }
     }
 
-    public static void ChangeLobbyName(){
+    private static void ChangeLobbyName(){
         ZeepkistNetwork.CurrentLobby.Name = Plugin.modConfig.lobbyName.Value;
-        ZeepkistNetwork.LobbyNameChanged();
-        ZeepkistNetwork.CurrentLobby.MaxPlayerCount = Plugin.modConfig.lobbyMaxPlayers.Value;
-        ZeepkistNetwork.LobbyMaxPlayersChanged();
-        ZeepkistNetwork.CurrentLobby.IsPublic = true;
-        ZeepkistNetwork.LobbyVisibilityChanged();
+        try
+        {
+            ZeepkistNetwork.NetworkClient?.SendPacket(new ChangeLobbyNamePacket
+            {
+                Name = ZeepkistNetwork.CurrentLobby.Name,
+            });
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError("Unabled exception in ChangeLobbyName: " + ex);
+        }
     } 
+    private static void ChangeLobbyMaxPlayers(){
+        ZeepkistNetwork.CurrentLobby.MaxPlayerCount = Plugin.modConfig.lobbyMaxPlayers.Value;
+        try
+        {
+            ZeepkistNetwork.NetworkClient?.SendPacket(new ChangeLobbyMaxPlayersPacket
+            {
+                MaxPlayers = ZeepkistNetwork.CurrentLobby.MaxPlayerCount,
+            });
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError("Unabled exception in ChangeLobbyMaxPlayers: " + ex);
+        }
+    }
+
+    private static void ChangeLobbyVisibility(){
+        ZeepkistNetwork.CurrentLobby.IsPublic = true;
+        try
+        {
+            ZeepkistNetwork.NetworkClient?.SendPacket(new ChangeLobbyVisibilityPacket
+            {
+                Visiblity = ZeepkistNetwork.CurrentLobby.IsPublic,
+            });
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError("Unabled exception in ChangeLobbyVisibility: " + ex);
+        }
+    }  
     
+    public static void ChangeLobbyInfo()
+    {
+        ChangeLobbyName();
+        ChangeLobbyMaxPlayers();
+        ChangeLobbyVisibility();
+    }
 }
