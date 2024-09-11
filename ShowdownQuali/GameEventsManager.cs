@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ShowdownQuali;
 using ZeepkistClient;
 using ZeepSDK.Multiplayer;
+using ZeepSDK.Racing;
 
 public class GameEventsManager{
 
@@ -20,7 +22,8 @@ public class GameEventsManager{
         MultiplayerApi.DisconnectedFromGame += OnDisconnected;
         MultiplayerApi.CreatedRoom += OnCreatedRoom;
         ZeepkistNetwork.LobbyListUpdated += OnLobbyListUpdated;
-        ZeepkistNetwork.MasterChanged += OnMasterChanged;   
+        ZeepkistNetwork.MasterChanged += OnMasterChanged;
+        RacingApi.LevelLoaded += OnLevelLoaded;   
     }
 
     private static void OnJoinedRoom(){
@@ -50,13 +53,7 @@ public class GameEventsManager{
         gotDisconnected = false;
         createNewLobby = false;
         if (LobbiesManager.ShowdownStarted){
-            LobbiesManager.JoinMessage();
-            double remainingTime = ResetLobbyTimerManager.RemainingTime;
-            int newLobbyTime = (int)(remainingTime / 1000) + (60*10); 
-            CommandSenderManager.SetLobbyTime(newLobbyTime);
-            CountdownManager.ResumeCountdown();
-            ResetLobbyTimerManager.ResumeDailyTimer();
-            // MISSING ADDING QUALI LEVEL !!!!!!
+            LobbiesManager.SetLobbyForShowdownResume();
         }
     }
 
@@ -82,13 +79,30 @@ public class GameEventsManager{
             gotDisconnected = false;
             createNewLobby = false;
             WaitingHostTimerManager.StopWaitingHostTimer();
-            LobbiesManager.JoinMessage();
-            double remainingTime = ResetLobbyTimerManager.RemainingTime;
-            int newLobbyTime = (int)(remainingTime / 1000) + (60*10); 
-            CommandSenderManager.SetLobbyTime(newLobbyTime);
-            CountdownManager.ResumeCountdown();
-            ResetLobbyTimerManager.ResumeDailyTimer();
-            // MISSING ADDING QUALI LEVEL !!!!!!
+            LobbiesManager.SetLobbyForShowdownResume();
+        }
+    }
+
+    private static void OnLevelLoaded()
+    {
+        ModLogger.LogInfo("Level loaded");
+        if (ZeepkistNetwork.LocalPlayerHasHostPowers()&&LobbiesManager.ShowdownStarted&&LobbiesManager.PlaylistSet){
+            LobbiesManager.PlaylistSet = false;
+            if(!LobbiesManager.ShowDownResume){
+                LobbiesManager.JoinMessage();
+                LobbiesManager.LobbyTime();
+                ResetLobbyTimerManager.StartDailyTimer();
+                CountdownManager.StartCountdown();
+            }
+            else{
+                LobbiesManager.ShowDownResume = false;
+                LobbiesManager.JoinMessage();
+                double remainingTime = ResetLobbyTimerManager.RemainingTime;
+                int newLobbyTime = (int)(remainingTime / 1000) + (60*10); 
+                CommandSenderManager.SetLobbyTime(newLobbyTime);
+                CountdownManager.ResumeCountdown();
+                ResetLobbyTimerManager.ResumeDailyTimer();
+            }
         }
     }
     

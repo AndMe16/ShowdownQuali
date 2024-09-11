@@ -47,5 +47,9 @@ public class CommandSenderManager{
         ChatApi.SendMessage("/joinmessage off");
     }
 
+    public static void SkipNextLevel(){
+        ChatApi.SendMessage("/fs");
+    }
+
 
 }

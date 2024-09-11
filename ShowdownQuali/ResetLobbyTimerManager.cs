@@ -19,7 +19,7 @@ public class ResetLobbyTimerManager
 
     private static Stopwatch stopwatch = new Stopwatch();
 
-    public static void StartCountdown()
+    public static void StartDailyTimer()
     {
         ModLogger.LogInfo($"Starting dailyTimer. dailyMilliSeconds: {dailyMilliSeconds}");
         dailyTimer = new Timer(dailyMilliSeconds - (10 * 60 * 1000)); // -10 minutes to compensate timer errors 

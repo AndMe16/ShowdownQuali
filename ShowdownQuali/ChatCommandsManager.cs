@@ -1,3 +1,4 @@
+using ShowdownQuali;
 using ZeepkistClient;
 using ZeepSDK.ChatCommands;
 
@@ -19,16 +20,10 @@ public class ChatCommandManager
 
     private static void OnStartCommand(string arguments)
     {
-        if(ZeepkistNetwork.LocalPlayerHasHostPowers()){
+        if(ZeepkistNetwork.LocalPlayerHasHostPowers()&&!LobbiesManager.ShowdownStarted){
             ModLogger.LogInfo("Received a QualiStart command");
-            LobbiesManager.ShowdownStarted = true;
-            LobbiesManager.JoinMessage();
-            LobbiesManager.LobbyTime();
-            ResetLobbyTimerManager.StartCountdown();
-            CountdownManager.StartCountdown();
-        // MISSING ADDING QUALI LEVEL !!!!!!
+            LobbiesManager.SetLobbyForShowdownStart();
         }
-        
     }
 
 

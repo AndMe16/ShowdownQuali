@@ -1,4 +1,6 @@
+using System.Collections;
 using ShowdownQuali;
+using UnityEngine;
 using ZeepkistClient;
 
 public class LobbiesManager{
@@ -33,7 +35,20 @@ public class LobbiesManager{
         get { return showdownStarted; }
         set { showdownStarted = value; }
     }
+    private static bool playlistSet = false;
+    public static bool PlaylistSet
+    {
+        get { return playlistSet; }
+        set { playlistSet = value; }
+    }
 
+    private static bool showDownResume = false;
+
+    public static bool ShowDownResume
+    {
+        get { return showDownResume; }
+        set { showDownResume = value; }
+    }
     
 
     public static string GetCurrentLobby(){
@@ -71,5 +86,44 @@ public class LobbiesManager{
         CommandSenderManager.SetJoinMessage(joinMessageColor,joinMessageEnded);
     }
 
+    public static void SetLobbyForShowdownStart(){
+        playlistSet = true;
+        showdownStarted = true;
+        PlaylistManager.LoadPlaylist(Plugin.modConfig.qualiPlaylistName.Value);
+        if(!PlaylistManager.CompareLevels(Plugin.modConfig.qualiPlaylistName.Value)){
+            CommandSenderManager.SkipNextLevel();
+        }
+        else{
+            JoinMessage();
+            LobbyTime();
+            ResetLobbyTimerManager.StartDailyTimer();
+            CountdownManager.StartCountdown();
+        }
+        
+    }
+    public static void SetLobbyForShowdownResume()
+    {
+        CoroutineStarter.StartExternalCoroutine(DelayedLoadPlaylist());
+    }
+
+    private static IEnumerator DelayedLoadPlaylist()
+    {
+        yield return new WaitForSeconds(2f); // 2-second delay
+        playlistSet = true;
+        showDownResume = true;
+        PlaylistManager.LoadPlaylist(Plugin.modConfig.qualiPlaylistName.Value);
+        if(!PlaylistManager.CompareLevels(Plugin.modConfig.qualiPlaylistName.Value)){
+            CommandSenderManager.SkipNextLevel();
+        }
+        else{
+            ShowDownResume = false;
+            JoinMessage();
+            double remainingTime = ResetLobbyTimerManager.RemainingTime;
+            int newLobbyTime = (int)(remainingTime / 1000) + (60*10); 
+            CommandSenderManager.SetLobbyTime(newLobbyTime);
+            CountdownManager.ResumeCountdown();
+            ResetLobbyTimerManager.ResumeDailyTimer();
+        }
+    }
     
 }

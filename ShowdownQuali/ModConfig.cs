@@ -5,6 +5,7 @@ using ZeepSDK.Multiplayer;
 public class ModConfig
 {
     public ConfigEntry<int> qualifierDuration;
+    public ConfigEntry<string> qualiPlaylistName;
 
     private event EventHandler<SettingChangedEventArgs> OnSettingChanged;
 
@@ -14,7 +15,10 @@ public class ModConfig
         qualifierDuration = config.Bind("Duration", "qualifierDuration (sec)", 172800, 
                                     new ConfigDescription("Set a custom duration of the event", new AcceptableValueRange<int>(2400, 172800)));
 
+        qualiPlaylistName = config.Bind("Qualifier Level", "Playlist Name", "ShowdownS4QualiPlaylist","Set the playlist name that contains the qualifier track");
+
         qualifierDuration.SettingChanged += SettingChangedHandler;
+        qualiPlaylistName.SettingChanged += SettingChangedHandler;
         OnSettingChanged += OnSettingsChanged;
     }
 
