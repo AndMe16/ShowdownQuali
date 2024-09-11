@@ -34,7 +34,7 @@ public class ChatCommandManager
 
     private static void OnStopCommand(string arguments)
     {
-        if (ZeepkistNetwork.LocalPlayerHasHostPowers())
+        if (ZeepkistNetwork.LocalPlayerHasHostPowers()&&LobbiesManager.ShowdownStarted)
         {
             ModLogger.LogInfo("Received a QualiStop command");
             LobbiesManager.ShowdownStarted = false;
