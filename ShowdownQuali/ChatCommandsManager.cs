@@ -1,3 +1,4 @@
+using ZeepkistClient;
 using ZeepSDK.ChatCommands;
 
 
@@ -18,13 +19,16 @@ public class ChatCommandManager
 
     private static void OnStartCommand(string arguments)
     {
-        ModLogger.LogInfo("Received a QualiStart command");
-        LobbiesManager.ShowdownStarted = true;
-        LobbiesManager.JoinMessage();
-        LobbiesManager.LobbyTime();
-        ResetLobbyTimerManager.StartCountdown();
-        CountdownManager.StartCountdown();
+        if(ZeepkistNetwork.LocalPlayerHasHostPowers()){
+            ModLogger.LogInfo("Received a QualiStart command");
+            LobbiesManager.ShowdownStarted = true;
+            LobbiesManager.JoinMessage();
+            LobbiesManager.LobbyTime();
+            ResetLobbyTimerManager.StartCountdown();
+            CountdownManager.StartCountdown();
         // MISSING ADDING QUALI LEVEL !!!!!!
+        }
+        
     }
 
 
@@ -35,11 +39,15 @@ public class ChatCommandManager
 
     private static void OnStopCommand(string arguments)
     {
-        ModLogger.LogInfo("Received a QualiStop command");
-        LobbiesManager.ShowdownStarted = false;
-        ResetLobbyTimerManager.StopDailyTimer();
-        CountdownManager.StopCountdownTimer();
-        CommandSenderManager.RemoveJoinServerMessages();
+        if (ZeepkistNetwork.LocalPlayerHasHostPowers())
+        {
+            ModLogger.LogInfo("Received a QualiStop command");
+            LobbiesManager.ShowdownStarted = false;
+            ResetLobbyTimerManager.StopDailyTimer();
+            CountdownManager.StopCountdownTimer();
+            CommandSenderManager.RemoveJoinServerMessages();
+        }
+        
     }
 
     private static void RegisterInfoCommand(){
