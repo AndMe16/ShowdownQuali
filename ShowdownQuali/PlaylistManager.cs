@@ -24,4 +24,8 @@ public class PlaylistManager{
         }
         return false;
     }
+
+    public static void SetHoFIndex(){
+        MultiplayerApi.SetNextLevelIndex(1);
+    }
 }

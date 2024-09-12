@@ -38,9 +38,7 @@ public class ChatCommandManager
         {
             ModLogger.LogInfo("Received a QualiStop command");
             LobbiesManager.ShowdownStarted = false;
-            LobbiesManager.ShowDownResume = false;
             LobbiesManager.PlaylistSet = false;
-            ResetLobbyTimerManager.StopDailyTimer();
             CountdownManager.StopCountdownTimer();
             CommandSenderManager.RemoveJoinServerMessages();
         }

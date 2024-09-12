@@ -48,8 +48,7 @@ public class GameEventsManager{
         ModLogger.LogInfo($"Disconnected from lobby");
         gotDisconnected = true;
         if (LobbiesManager.ShowdownStarted){
-            CountdownManager.PauseCountdown();
-            ResetLobbyTimerManager.PauseDailyTimer();
+            CountdownManager.StopCountdownTimer();
             LobbiesManager.PlaylistSet = false;
             reconnectCorutine.StartExternalCoroutine(NetworkManager.TryReconnect());
         }
@@ -79,7 +78,6 @@ public class GameEventsManager{
             
         }
     }
-
     private static void OnMasterChanged(ZeepkistNetworkPlayer player)
     {
         ModLogger.LogInfo($"The new master of the lobby is: {player.Username}");
@@ -95,25 +93,15 @@ public class GameEventsManager{
     private static void OnLevelLoaded()
     {
         ModLogger.LogInfo("Level loaded");
-        if (ZeepkistNetwork.LocalPlayerHasHostPowers()&&LobbiesManager.ShowdownStarted&&LobbiesManager.PlaylistSet){
+        if(ZeepkistNetwork.LocalPlayerHasHostPowers()&&LobbiesManager.EndingShowdown){
+            LobbiesManager.EndingShowdown = false;
+            LobbiesManager.LobbyTime(60*6);
+            CommandSenderManager.NotifyEndOfShowdown();
+            CommandSenderManager.SetJoinMessage(LobbiesManager.joinMessageColor,LobbiesManager.joinMessageEnded);
+        }
+        else if (ZeepkistNetwork.LocalPlayerHasHostPowers()&&LobbiesManager.ShowdownStarted&&LobbiesManager.PlaylistSet){
             LobbiesManager.PlaylistSet = false;
-            if(!LobbiesManager.ShowDownResume){
-                LobbiesManager.ChangeLobbyInfo(); 
-                LobbiesManager.JoinMessage();
-                LobbiesManager.LobbyTime();
-                ResetLobbyTimerManager.StartDailyTimer();
-                CountdownManager.StartCountdown();
-            }
-            else{
-                LobbiesManager.ShowDownResume = false;
-                LobbiesManager.ChangeLobbyInfo(); 
-                LobbiesManager.JoinMessage();
-                double remainingTime = ResetLobbyTimerManager.RemainingTime + (ResetLobbyTimerManager.DailyMilliSeconds*0.1);
-                int newLobbyTime = (int)(remainingTime / 1000); 
-                CommandSenderManager.SetLobbyTime(newLobbyTime);
-                CountdownManager.ResumeCountdown();
-                ResetLobbyTimerManager.ResumeDailyTimer();
-            }
+            LobbiesManager.ShowdownStart();
         }
     }
 

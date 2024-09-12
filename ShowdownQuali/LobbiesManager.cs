@@ -5,20 +5,12 @@ using UnityEngine;
 using ZeepkistClient;
 using ZeepkistNetworking;
 
-public class LobbiesManager{
-
-    // Lobby time
-    private static int secondsInADay = Plugin.modConfig.remainingTimeInSeconds/2;
-
-    public static int SecondsInADay
-    {
-        set { secondsInADay = value; }
-    }
+public class LobbiesManager{    
 
     // Lobby Joinmessage
-    private static readonly string joinMessageColor = "orange";
+    public static readonly string joinMessageColor = "orange";
     private static readonly string joinMessage = "This is the qualifier round! To compete in the event, you must register on our Discord. Join here: dsc.gg/zeepkist-showdown"; 
-    private static readonly string joinMessageEnded = "The qualifier is over! Check our Discord for more info! dsc.gg/zeepkist-showdown";
+    public static readonly string joinMessageEnded = "The qualifier is over! Check our Discord for more info! dsc.gg/zeepkist-showdown";
 
     // Lobby Info
     private static string lobbyID;
@@ -42,12 +34,11 @@ public class LobbiesManager{
         set { playlistSet = value; }
     }
 
-    private static bool showDownResume = false;
+    private static bool endingShowdown = false;
 
-    public static bool ShowDownResume
-    {
-        get { return showDownResume; }
-        set { showDownResume = value; }
+    public static bool EndingShowdown{
+        get {return endingShowdown;}
+        set {endingShowdown = value;}
     }
 
     private static CoroutineStarter delayedLoadPlaylistCorutine = new();
@@ -58,9 +49,9 @@ public class LobbiesManager{
         return lobbyID;
     }
 
-    public static void LobbyTime(){
-        ModLogger.LogInfo($"Setting lobby timer to {secondsInADay} seconds");
-        CommandSenderManager.SetLobbyTime(secondsInADay);
+    public static void LobbyTime(int seconds){
+        ModLogger.LogInfo($"Setting lobby timer to {seconds} seconds");
+        CommandSenderManager.SetLobbyTime(seconds);
     }
 
     public static void JoinMessage(){
@@ -84,12 +75,12 @@ public class LobbiesManager{
     public static void OnShowdownEnded(){
         ModLogger.LogInfo("Showdown Ended!");
         showdownStarted = false;
-        showDownResume = false;
         playlistSet = false;
-        ResetLobbyTimerManager.StopDailyTimer();
+        endingShowdown = true;
         CountdownManager.StopCountdownTimer();
-        CommandSenderManager.NotifyEndOfShowdown();
-        CommandSenderManager.SetJoinMessage(joinMessageColor,joinMessageEnded);
+        CommandSenderManager.NotifyEndOfShowdownChat();
+        PlaylistManager.SetHoFIndex();
+        CommandSenderManager.SkipNextLevel();
     }
 
     public static void SetLobbyForShowdownStart(){
@@ -100,11 +91,7 @@ public class LobbiesManager{
             CommandSenderManager.SkipNextLevel();
         }
         else{
-            ChangeLobbyInfo(); 
-            JoinMessage();
-            LobbyTime();
-            ResetLobbyTimerManager.StartDailyTimer();
-            CountdownManager.StartCountdown();
+            ShowdownStart();
         }
         
     }
@@ -117,20 +104,12 @@ public class LobbiesManager{
     {
         yield return new WaitForSeconds(5f); // 2-second delay
         playlistSet = true;
-        showDownResume = true;
         PlaylistManager.LoadPlaylist(Plugin.modConfig.qualiPlaylistName.Value);
         if(!PlaylistManager.CompareLevels(Plugin.modConfig.qualiPlaylistName.Value)){
             CommandSenderManager.SkipNextLevel();
         }
         else{
-            showDownResume = false;
-            ChangeLobbyInfo(); 
-            JoinMessage();
-            double remainingTime = ResetLobbyTimerManager.RemainingTime + (ResetLobbyTimerManager.DailyMilliSeconds*0.1);
-            int newLobbyTime = (int)(remainingTime / 1000); 
-            CommandSenderManager.SetLobbyTime(newLobbyTime);
-            CountdownManager.ResumeCountdown();
-            ResetLobbyTimerManager.ResumeDailyTimer();
+            ShowdownStart();
         }
     }
 
@@ -183,5 +162,13 @@ public class LobbiesManager{
         ChangeLobbyName();
         ChangeLobbyMaxPlayers();
         ChangeLobbyVisibility();
+    }
+
+    public static void ShowdownStart(){
+        ChangeLobbyInfo(); 
+        JoinMessage();
+        CountdownManager.UpdatingCountDownLeft();
+        LobbyTime(CountdownManager.CountdownLeft+60);
+        CountdownManager.StartCountdown();
     }
 }

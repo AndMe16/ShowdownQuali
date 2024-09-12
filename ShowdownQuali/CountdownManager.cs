@@ -4,11 +4,10 @@ using ShowdownQuali;
 
 public class CountdownManager{
     private static Timer countdownTimer;
-    private static int countdownLeft = Plugin.modConfig.remainingTimeInSeconds;
-
+    private static int countdownLeft;
     public static int CountdownLeft
     {
-        set { countdownLeft = value; }
+        get { return countdownLeft; }
     }
 
     public static void StartCountdown()
@@ -24,7 +23,7 @@ public class CountdownManager{
     {
         if (countdownTimer != null)
         {
-            countdownLeft = Plugin.modConfig.remainingTimeInSeconds;
+            countdownLeft = 0;
             countdownTimer.Stop();
             countdownTimer.Dispose();
         }
@@ -39,12 +38,11 @@ public class CountdownManager{
         else
         {
             StopCountdownTimer();
-            ResetLobbyTimerManager.StopDailyTimer();
             LobbiesManager.OnShowdownEnded();
         }
     }
 
-     private static void UpdateCountdown()
+    private static void UpdateCountdown()
     {
         string formattedTime = GetFormattedTime();
         CommandSenderManager.SetServerMessage(formattedTime);
@@ -58,13 +56,19 @@ public class CountdownManager{
         return string.Format("{0:D2}:{1:D2}:{2:D2}", totalHours, time.Minutes, time.Seconds);
     }
 
-    public static void PauseCountdown(){
-        countdownTimer?.Stop();
-    }
 
-    public static void ResumeCountdown(){
-        countdownTimer?.Start();
+    public static void UpdatingCountDownLeft()
+    {
+        int currentUnixTimestamp = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        int remainingTimeInSeconds = Plugin.modConfig.endUnixTimestamp.Value - currentUnixTimestamp;
+
+        if (remainingTimeInSeconds < 0)
+        {
+            ModLogger.LogWarning("The endUnixTimestamp has already passed.");
+            countdownLeft = 0; // If the event has already ended, return 60
+        }
+        ModLogger.LogInfo($"Remaining time updated: {remainingTimeInSeconds} seconds");
+        countdownLeft = (int)remainingTimeInSeconds;
     }
-   
     
 }

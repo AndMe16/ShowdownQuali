@@ -26,6 +26,7 @@ public class WaitingHostTimerManager{
     private static void OnTimedEvent(object source, ElapsedEventArgs e)
     {
         ModLogger.LogInfo("Creating new lobby after 5 minutes waiting for host");
+        CommandSenderManager.NotifyCreatingNewLobby();
         GameEventsManager.CreateNewLobby = true;
         StopWaitingHostTimer();
         ZeepkistNetwork.Disconnect(); // Not sure if this works :)

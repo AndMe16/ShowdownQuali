@@ -51,5 +51,12 @@ public class CommandSenderManager{
         ChatApi.SendMessage("/fs");
     }
 
+    public static void NotifyCreatingNewLobby(){
+        ChatApi.SendMessage("Creating a new official Showdown Lobby. I'll wait for you all there!");
+    }
+
+    public static void NotifyEndOfShowdownChat(){
+        ChatApi.SendMessage("The Qualifier is over! Thank you for participating :party:");
+    }
 
 }

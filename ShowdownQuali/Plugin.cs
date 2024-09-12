@@ -25,6 +25,7 @@ public class Plugin : BaseUnityPlugin
         GameEventsManager.SubscribeToEvents();
         ChatCommandManager.RegisterCommands();
         _ = CoroutineStarter.Instance;
+        modConfig.endUnixTimestamp.Value = modConfig.GetTimestampInAdvance(2880);
     }
 
     
