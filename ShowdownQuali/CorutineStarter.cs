@@ -3,7 +3,23 @@ using UnityEngine;
 
 public class CoroutineStarter : MonoBehaviour
 {
+    private Coroutine startedCoroutine;
     private static CoroutineStarter _instance;
+
+    public static CoroutineStarter Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                // Create a new GameObject if no instance exists
+                GameObject obj = new GameObject("CoroutineStarter");
+                _instance = obj.AddComponent<CoroutineStarter>();
+                DontDestroyOnLoad(obj); // Optional: Keeps this object across different scenes
+            }
+            return _instance;
+        }
+    }
 
     private void Awake()
     {
@@ -11,25 +27,32 @@ public class CoroutineStarter : MonoBehaviour
         {
             _instance = this;
         }
+        else if (_instance != this)
+        {
+            Destroy(gameObject); // Ensure there is only one instance
+        }
     }
 
-    public static void StartExternalCoroutine(IEnumerator coroutine)
+    public void StartExternalCoroutine(IEnumerator coroutine)
     {
         if (_instance == null)
         {
             ModLogger.LogError("CoroutineStarter is not initialized!");
             return;
         }
-        _instance.StartCoroutine(coroutine);
+        startedCoroutine = _instance.StartCoroutine(coroutine);
     }
 
-    public static void StopExternalCoroutine(IEnumerator coroutine)
+    public void StopExternalCoroutine()
     {
         if (_instance == null)
         {
             ModLogger.LogError("CoroutineStarter is not initialized!");
             return;
         }
-        _instance.StopCoroutine(coroutine);
+        if (startedCoroutine != null)
+        {
+            _instance.StopCoroutine(startedCoroutine);
+        }
     }
 }

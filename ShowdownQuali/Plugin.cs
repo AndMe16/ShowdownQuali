@@ -24,15 +24,10 @@ public class Plugin : BaseUnityPlugin
         modConfig = new ModConfig(Config);
         GameEventsManager.SubscribeToEvents();
         ChatCommandManager.RegisterCommands();
-        InitializeCoroutineStarter();
+        _ = CoroutineStarter.Instance;
     }
 
-    private void InitializeCoroutineStarter()
-    {
-        GameObject coroutineStarterObject = new GameObject("CoroutineStarter");
-        coroutineStarterObject.AddComponent<CoroutineStarter>();
-        DontDestroyOnLoad(coroutineStarterObject);  // Optional: keep it across scenes
-    }
+    
 
 
     

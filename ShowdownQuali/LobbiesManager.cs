@@ -8,7 +8,7 @@ using ZeepkistNetworking;
 public class LobbiesManager{
 
     // Lobby time
-    private static int secondsInADay = Plugin.modConfig.qualifierDuration.Value/2;
+    private static int secondsInADay = Plugin.modConfig.remainingTimeInSeconds/2;
 
     public static int SecondsInADay
     {
@@ -49,6 +49,8 @@ public class LobbiesManager{
         get { return showDownResume; }
         set { showDownResume = value; }
     }
+
+    private static CoroutineStarter delayedLoadPlaylistCorutine = new();
     
 
     public static string GetCurrentLobby(){
@@ -76,12 +78,16 @@ public class LobbiesManager{
             }
         }
         ModLogger.LogInfo("Couldn't find the previous lobby :( Creating a new one!");
-        ZeepkistNetwork.CreateLobby(Plugin.modConfig.lobbyName.Value,Plugin.modConfig.lobbyMaxPlayers.Value,true);
+        ZeepkistNetwork.CreateLobby(Plugin.modConfig.lobbyName.Value,Plugin.modConfig.lobbyMaxPlayers.Value,Plugin.modConfig.lobbyVisibility.Value);
     }
 
     public static void OnShowdownEnded(){
         ModLogger.LogInfo("Showdown Ended!");
         showdownStarted = false;
+        showDownResume = false;
+        playlistSet = false;
+        ResetLobbyTimerManager.StopDailyTimer();
+        CountdownManager.StopCountdownTimer();
         CommandSenderManager.NotifyEndOfShowdown();
         CommandSenderManager.SetJoinMessage(joinMessageColor,joinMessageEnded);
     }
@@ -104,12 +110,12 @@ public class LobbiesManager{
     }
     public static void SetLobbyForShowdownResume()
     {
-        CoroutineStarter.StartExternalCoroutine(DelayedLoadPlaylist());
+        delayedLoadPlaylistCorutine.StartExternalCoroutine(DelayedLoadPlaylist());
     }
 
     private static IEnumerator DelayedLoadPlaylist()
     {
-        yield return new WaitForSeconds(2f); // 2-second delay
+        yield return new WaitForSeconds(5f); // 2-second delay
         playlistSet = true;
         showDownResume = true;
         PlaylistManager.LoadPlaylist(Plugin.modConfig.qualiPlaylistName.Value);
@@ -117,11 +123,11 @@ public class LobbiesManager{
             CommandSenderManager.SkipNextLevel();
         }
         else{
-            ShowDownResume = false;
+            showDownResume = false;
             ChangeLobbyInfo(); 
             JoinMessage();
-            double remainingTime = ResetLobbyTimerManager.RemainingTime;
-            int newLobbyTime = (int)(remainingTime / 1000) + (60*10); 
+            double remainingTime = ResetLobbyTimerManager.RemainingTime + (ResetLobbyTimerManager.DailyMilliSeconds*0.1);
+            int newLobbyTime = (int)(remainingTime / 1000); 
             CommandSenderManager.SetLobbyTime(newLobbyTime);
             CountdownManager.ResumeCountdown();
             ResetLobbyTimerManager.ResumeDailyTimer();
@@ -158,7 +164,7 @@ public class LobbiesManager{
     }
 
     private static void ChangeLobbyVisibility(){
-        ZeepkistNetwork.CurrentLobby.IsPublic = true;
+        ZeepkistNetwork.CurrentLobby.IsPublic = Plugin.modConfig.lobbyVisibility.Value;
         try
         {
             ZeepkistNetwork.NetworkClient?.SendPacket(new ChangeLobbyVisibilityPacket

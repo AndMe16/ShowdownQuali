@@ -16,22 +16,22 @@ public class CommandSenderManager{
 
     public static void SetServerMessage(string formattedTime){
         timeLeftStr = formattedTime;
-        baseServerMessage = "/servermessage white 0 <size=+30><align=\"left\"><voffset=-1em><b><u><alpha=#00>S4OWDOWN</u></voffset>"
+        baseServerMessage = "/servermessage white 0 <size=+25><align=\"left\"><voffset=-1em><b><u><alpha=#00>S4OWDOWN</u></voffset>"
                                                         +"<br><line-height=1em><#FFFFFF><u>S<#F5DC4E>4<#FFFFFF>OWDOWN</u>"
-                                                        +"<br><pos=0.25em><u>SEASON<#F5DC4E>4</u><pos=5em><voffset=0.5em> </b><size=+25><#F77777>48h<#FFFFFF>-<#778AF7>Qualifier "
-                                                        +$"<pos=15em><#FFFFFF>Time Left: <#F5DC4E>{timeLeftStr}</voffset>"
-                                                        +"<br><line-height=50%><size=+10><#FFFFFF>Register in our discord to participate!"
+                                                        +"<br><pos=0.25em><u>SEASON<#F5DC4E>4</u><voffset=0.5em>  </b><nobr><size=+15><#F77777>48h<#FFFFFF>-<#778AF7>Qualifier  "
+                                                        +$"<#FFFFFF>Time Left: <#F5DC4E>{timeLeftStr}</voffset></nobr>"
+                                                        +"<br><line-height=70%><size=+10><#FFFFFF>Register in our discord to participate!"
                                                         +"<br>Link:<#F5DC4E> dsc.gg/zeepkist-showdown"
                                                         +"<br><#FFFFFF>For more info use <#F5DC4E>!qualiinfo <#FFFFFF>in chat";
         ChatApi.SendMessage(baseServerMessage);
     }
 
     public static void NotifyEndOfShowdown(){
-        baseServerMessage = "/servermessage white 0 <size=+30><align=\"left\"><voffset=-1em><b><u><alpha=#00>S4OWDOWN</u></voffset>"
+        baseServerMessage = "/servermessage white 0 <size=+25><align=\"left\"><voffset=-1em><b><u><alpha=#00>S4OWDOWN</u></voffset>"
                                                         +"<br><line-height=1em><#FFFFFF><u>S<#F5DC4E>4<#FFFFFF>OWDOWN</u>"
-                                                        +"<br><pos=0.25em><u>SEASON<#F5DC4E>4</u><pos=5em><voffset=0.5em> </b><size=+25><#F77777>48h<#FFFFFF>-<#778AF7>Qualifier "
-                                                        +$"<pos=15em><#F5DC4E>Time is up!</voffset>"
-                                                        +"<br><line-height=50%><size=+10>The qualifier is over! Check our Discord for more info!"
+                                                        +"<br><pos=0.25em><u>SEASON<#F5DC4E>4</u><voffset=0.5em>  </b><nobr><size=+15><#F77777>48h<#FFFFFF>-<#778AF7>Qualifier  "
+                                                        +$"<#F5DC4E>Time is up!</voffset></nobr>"
+                                                        +"<br><line-height=70%><size=+10>The qualifier is over! Check our Discord for more info!"
                                                         +"<br>Link:<#F5DC4E> dsc.gg/zeepkist-showdown"
                                                         +"<br><#FFFFFF>For more info use <#F5DC4E>!qualiinfo <#FFFFFF>in chat";
         ChatApi.SendMessage(baseServerMessage);

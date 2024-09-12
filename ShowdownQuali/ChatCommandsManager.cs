@@ -20,7 +20,7 @@ public class ChatCommandManager
 
     private static void OnStartCommand(string arguments)
     {
-        if(ZeepkistNetwork.LocalPlayerHasHostPowers()&&!LobbiesManager.ShowdownStarted){
+        if(ZeepkistNetwork.LocalPlayerHasHostPowers()&&!LobbiesManager.ShowdownStarted&&!GameEventsManager.inBetweenRounds){
             ModLogger.LogInfo("Received a QualiStart command");
             LobbiesManager.SetLobbyForShowdownStart();
         }
@@ -34,10 +34,12 @@ public class ChatCommandManager
 
     private static void OnStopCommand(string arguments)
     {
-        if (ZeepkistNetwork.LocalPlayerHasHostPowers()&&LobbiesManager.ShowdownStarted)
+        if (LobbiesManager.ShowdownStarted&&!GameEventsManager.inBetweenRounds)
         {
             ModLogger.LogInfo("Received a QualiStop command");
             LobbiesManager.ShowdownStarted = false;
+            LobbiesManager.ShowDownResume = false;
+            LobbiesManager.PlaylistSet = false;
             ResetLobbyTimerManager.StopDailyTimer();
             CountdownManager.StopCountdownTimer();
             CommandSenderManager.RemoveJoinServerMessages();

@@ -4,7 +4,7 @@ using ShowdownQuali;
 
 public class CountdownManager{
     private static Timer countdownTimer;
-    private static int countdownLeft = Plugin.modConfig.qualifierDuration.Value;
+    private static int countdownLeft = Plugin.modConfig.remainingTimeInSeconds;
 
     public static int CountdownLeft
     {
@@ -24,7 +24,7 @@ public class CountdownManager{
     {
         if (countdownTimer != null)
         {
-            countdownLeft = Plugin.modConfig.qualifierDuration.Value;
+            countdownLeft = Plugin.modConfig.remainingTimeInSeconds;
             countdownTimer.Stop();
             countdownTimer.Dispose();
         }

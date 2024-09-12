@@ -16,6 +16,10 @@ public class GameEventsManager{
         set { createNewLobby = value; }
     }
 
+    public static bool inBetweenRounds = false;
+
+    private static CoroutineStarter reconnectCorutine = new();
+
     public static void SubscribeToEvents()
     {
         MultiplayerApi.JoinedRoom += OnJoinedRoom;
@@ -23,7 +27,9 @@ public class GameEventsManager{
         MultiplayerApi.CreatedRoom += OnCreatedRoom;
         ZeepkistNetwork.LobbyListUpdated += OnLobbyListUpdated;
         ZeepkistNetwork.MasterChanged += OnMasterChanged;
-        RacingApi.LevelLoaded += OnLevelLoaded;   
+        RacingApi.LevelLoaded += OnLevelLoaded;
+        RacingApi.RoundEnded += OnRoundEnded;
+        RacingApi.RoundStarted += OnRoundStarted;
     }
 
     private static void OnJoinedRoom(){
@@ -44,6 +50,8 @@ public class GameEventsManager{
         if (LobbiesManager.ShowdownStarted){
             CountdownManager.PauseCountdown();
             ResetLobbyTimerManager.PauseDailyTimer();
+            LobbiesManager.PlaylistSet = false;
+            reconnectCorutine.StartExternalCoroutine(NetworkManager.TryReconnect());
         }
     }
     
@@ -61,8 +69,9 @@ public class GameEventsManager{
     {
         ModLogger.LogInfo("Lobby list got updated");
         if(gotDisconnected&&LobbiesManager.ShowdownStarted){
+            reconnectCorutine.StopExternalCoroutine();
             if(createNewLobby){
-                ZeepkistNetwork.CreateLobby(Plugin.modConfig.lobbyName.Value,Plugin.modConfig.lobbyMaxPlayers.Value,true);
+                ZeepkistNetwork.CreateLobby(Plugin.modConfig.lobbyName.Value,Plugin.modConfig.lobbyMaxPlayers.Value,Plugin.modConfig.lobbyVisibility.Value);
             }
             else{
                 LobbiesManager.RejoinLobby();
@@ -99,13 +108,21 @@ public class GameEventsManager{
                 LobbiesManager.ShowDownResume = false;
                 LobbiesManager.ChangeLobbyInfo(); 
                 LobbiesManager.JoinMessage();
-                double remainingTime = ResetLobbyTimerManager.RemainingTime;
-                int newLobbyTime = (int)(remainingTime / 1000) + (60*10); 
+                double remainingTime = ResetLobbyTimerManager.RemainingTime + (ResetLobbyTimerManager.DailyMilliSeconds*0.1);
+                int newLobbyTime = (int)(remainingTime / 1000); 
                 CommandSenderManager.SetLobbyTime(newLobbyTime);
                 CountdownManager.ResumeCountdown();
                 ResetLobbyTimerManager.ResumeDailyTimer();
             }
         }
+    }
+
+    private static void OnRoundEnded(){
+        inBetweenRounds = true;
+    }
+
+    private static void OnRoundStarted(){
+        inBetweenRounds = false;
     }
     
 }

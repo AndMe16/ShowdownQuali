@@ -5,10 +5,11 @@ using ShowdownQuali;
 public class ResetLobbyTimerManager
 {
     private static Timer dailyTimer;
-    private static int dailyMilliSeconds = Plugin.modConfig.qualifierDuration.Value * 1000/2;
+    private static int dailyMilliSeconds = Plugin.modConfig.remainingTimeInSeconds * 1000/2;
     public static int DailyMilliSeconds
     {
         set { dailyMilliSeconds=value; }
+        get {return dailyMilliSeconds;}
     }
     private static double remainingTime;
     public static double RemainingTime
@@ -22,7 +23,7 @@ public class ResetLobbyTimerManager
     public static void StartDailyTimer()
     {
         ModLogger.LogInfo($"Starting dailyTimer. dailyMilliSeconds: {dailyMilliSeconds}");
-        dailyTimer = new Timer(dailyMilliSeconds - (10 * 60 * 1000)); // -10 minutes to compensate timer errors 
+        dailyTimer = new Timer(dailyMilliSeconds - (dailyMilliSeconds*0.1)); // -10 minutes to compensate timer errors 
         dailyTimer.Elapsed += OnTimedEvent;
         dailyTimer.AutoReset = true;
         dailyTimer.Enabled = true;
@@ -67,6 +68,6 @@ public class ResetLobbyTimerManager
         LobbiesManager.LobbyTime();
         ModLogger.LogInfo("Resetting lobby timer");
         stopwatch.Reset(); // Reset the stopwatch after the timer event
-        remainingTime = dailyMilliSeconds - (10 * 60 * 1000); // Reset the remaining time
+        remainingTime = dailyMilliSeconds - (dailyMilliSeconds*0.1); // Reset the remaining time
     }
 }
