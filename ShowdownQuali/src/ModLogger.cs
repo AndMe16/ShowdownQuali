@@ -1,5 +1,7 @@
 using BepInEx.Logging;
 
+namespace ShowdownQuali;
+
 public static class ModLogger
 {
     public static ManualLogSource Logger { get; private set; }

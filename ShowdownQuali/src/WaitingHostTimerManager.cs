@@ -1,14 +1,16 @@
-using System;
 using System.Timers;
 using ZeepkistClient;
 
-public class WaitingHostTimerManager{
-    private static Timer waitingHostTimer; 
+namespace ShowdownQuali;
+
+public class WaitingHostTimerManager
+{
+    private static Timer waitingHostTimer;
 
     public static void StartWaitingHostTimer()
     {
         ModLogger.LogInfo("Starting waitingHostTimer");
-        waitingHostTimer = new Timer(5*60*1000); 
+        waitingHostTimer = new Timer(5 * 60 * 1000);
         waitingHostTimer.Elapsed += OnTimedEvent;
         waitingHostTimer.AutoReset = false;
         waitingHostTimer.Enabled = true;
@@ -16,11 +18,13 @@ public class WaitingHostTimerManager{
 
     public static void StopWaitingHostTimer()
     {
-        if (waitingHostTimer != null)
+        if (waitingHostTimer == null)
         {
-            waitingHostTimer.Stop();
-            waitingHostTimer.Dispose();
+            return;
         }
+
+        waitingHostTimer.Stop();
+        waitingHostTimer.Dispose();
     }
 
     private static void OnTimedEvent(object source, ElapsedEventArgs e)
@@ -31,6 +35,4 @@ public class WaitingHostTimerManager{
         StopWaitingHostTimer();
         ZeepkistNetwork.Disconnect(); // Not sure if this works :)
     }
-   
-    
 }

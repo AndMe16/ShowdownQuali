@@ -1,100 +1,95 @@
 using System;
 using System.Collections;
-using ShowdownQuali;
 using UnityEngine;
 using ZeepkistClient;
 using ZeepkistNetworking;
 
-public class LobbiesManager{    
+namespace ShowdownQuali;
 
+public class LobbiesManager
+{
     // Lobby Joinmessage
     public static readonly string joinMessageColor = "orange";
-    private static readonly string joinMessage = "This is the qualifier round! To compete in the event, you must register on our Discord. Join here: dsc.gg/zeepkist-showdown"; 
+    private static readonly string joinMessage = "This is the qualifier round! To compete in the event, you must register on our Discord. Join here: dsc.gg/zeepkist-showdown";
     public static readonly string joinMessageEnded = "The qualifier is over! Check our Discord for more info! dsc.gg/zeepkist-showdown";
 
     // Lobby Info
-    private static string lobbyID;
-    public static string LobbyID
-    {
-        get { return lobbyID; }
-        set { lobbyID = value; }
-    }
 
     // Showdown status
-    private static bool showdownStarted = false;
-    public static bool ShowdownStarted
+
+    private static readonly CoroutineStarter delayedLoadPlaylistCorutine = new CoroutineStarter();
+
+    public static string LobbyID { get; set; }
+
+    public static bool ShowdownStarted { get; set; }
+
+    public static bool PlaylistSet { get; set; }
+
+    public static bool EndingShowdown { get; set; }
+
+
+    public static string GetCurrentLobby()
     {
-        get { return showdownStarted; }
-        set { showdownStarted = value; }
+        LobbyID = ZeepkistNetwork.CurrentLobby.ID;
+        return LobbyID;
     }
-    private static bool playlistSet = false;
-    public static bool PlaylistSet
+
+    public static void LobbyTime(int seconds)
     {
-        get { return playlistSet; }
-        set { playlistSet = value; }
-    }
-
-    private static bool endingShowdown = false;
-
-    public static bool EndingShowdown{
-        get {return endingShowdown;}
-        set {endingShowdown = value;}
-    }
-
-    private static CoroutineStarter delayedLoadPlaylistCorutine = new();
-    
-
-    public static string GetCurrentLobby(){
-        lobbyID = ZeepkistNetwork.CurrentLobby.ID;
-        return lobbyID;
-    }
-
-    public static void LobbyTime(int seconds){
         ModLogger.LogInfo($"Setting lobby timer to {seconds} seconds");
         CommandSenderManager.SetLobbyTime(seconds);
     }
 
-    public static void JoinMessage(){
-        ModLogger.LogInfo($"Setting join message");
-        CommandSenderManager.SetJoinMessage(joinMessageColor,joinMessage);
+    public static void JoinMessage()
+    {
+        ModLogger.LogInfo("Setting join message");
+        CommandSenderManager.SetJoinMessage(joinMessageColor, joinMessage);
     }
 
 
-    public static void RejoinLobby(){
-        foreach(ZeepkistLobby lobby in ZeepkistNetwork.AllLobbies){
-            if(lobby.ID==lobbyID){
+    public static void RejoinLobby()
+    {
+        foreach (ZeepkistLobby lobby in ZeepkistNetwork.AllLobbies)
+        {
+            if (lobby.ID == LobbyID)
+            {
                 ModLogger.LogInfo("Congrats! The previous lobby was found!");
-                ZeepkistNetwork.JoinLobby(lobbyID);
+                ZeepkistNetwork.JoinLobby(LobbyID);
                 return;
             }
         }
+
         ModLogger.LogInfo("Couldn't find the previous lobby :( Creating a new one!");
-        ZeepkistNetwork.CreateLobby(Plugin.modConfig.lobbyName.Value,Plugin.modConfig.lobbyMaxPlayers.Value,Plugin.modConfig.lobbyVisibility.Value);
+        ZeepkistNetwork.CreateLobby(Plugin.modConfig.lobbyName.Value, Plugin.modConfig.lobbyMaxPlayers.Value, Plugin.modConfig.lobbyVisibility.Value);
     }
 
-    public static void OnShowdownEnded(){
+    public static void OnShowdownEnded()
+    {
         ModLogger.LogInfo("Showdown Ended!");
-        showdownStarted = false;
-        playlistSet = false;
-        endingShowdown = true;
+        ShowdownStarted = false;
+        PlaylistSet = false;
+        EndingShowdown = true;
         CountdownManager.StopCountdownTimer();
         CommandSenderManager.NotifyEndOfShowdownChat();
         PlaylistManager.SetHoFIndex();
         CommandSenderManager.SkipNextLevel();
     }
 
-    public static void SetLobbyForShowdownStart(){
-        playlistSet = true;
-        showdownStarted = true;
+    public static void SetLobbyForShowdownStart()
+    {
+        PlaylistSet = true;
+        ShowdownStarted = true;
         PlaylistManager.LoadPlaylist(Plugin.modConfig.qualiPlaylistName.Value);
-        if(!PlaylistManager.CompareLevels(Plugin.modConfig.qualiPlaylistName.Value)){
+        if (!PlaylistManager.CompareLevels(Plugin.modConfig.qualiPlaylistName.Value))
+        {
             CommandSenderManager.SkipNextLevel();
         }
-        else{
+        else
+        {
             ShowdownStart();
         }
-        
     }
+
     public static void SetLobbyForShowdownResume()
     {
         delayedLoadPlaylistCorutine.StartExternalCoroutine(DelayedLoadPlaylist());
@@ -103,37 +98,42 @@ public class LobbiesManager{
     private static IEnumerator DelayedLoadPlaylist()
     {
         yield return new WaitForSeconds(5f); // 2-second delay
-        playlistSet = true;
+        PlaylistSet = true;
         PlaylistManager.LoadPlaylist(Plugin.modConfig.qualiPlaylistName.Value);
-        if(!PlaylistManager.CompareLevels(Plugin.modConfig.qualiPlaylistName.Value)){
+        if (!PlaylistManager.CompareLevels(Plugin.modConfig.qualiPlaylistName.Value))
+        {
             CommandSenderManager.SkipNextLevel();
         }
-        else{
+        else
+        {
             ShowdownStart();
         }
     }
 
-    private static void ChangeLobbyName(){
+    private static void ChangeLobbyName()
+    {
         ZeepkistNetwork.CurrentLobby.Name = Plugin.modConfig.lobbyName.Value;
         try
         {
             ZeepkistNetwork.NetworkClient?.SendPacket(new ChangeLobbyNamePacket
             {
-                Name = ZeepkistNetwork.CurrentLobby.Name,
+                Name = ZeepkistNetwork.CurrentLobby.Name
             });
         }
         catch (Exception ex)
         {
             ModLogger.LogError("Unabled exception in ChangeLobbyName: " + ex);
         }
-    } 
-    private static void ChangeLobbyMaxPlayers(){
+    }
+
+    private static void ChangeLobbyMaxPlayers()
+    {
         ZeepkistNetwork.CurrentLobby.MaxPlayerCount = Plugin.modConfig.lobbyMaxPlayers.Value;
         try
         {
             ZeepkistNetwork.NetworkClient?.SendPacket(new ChangeLobbyMaxPlayersPacket
             {
-                MaxPlayers = ZeepkistNetwork.CurrentLobby.MaxPlayerCount,
+                MaxPlayers = ZeepkistNetwork.CurrentLobby.MaxPlayerCount
             });
         }
         catch (Exception ex)
@@ -142,21 +142,22 @@ public class LobbiesManager{
         }
     }
 
-    private static void ChangeLobbyVisibility(){
+    private static void ChangeLobbyVisibility()
+    {
         ZeepkistNetwork.CurrentLobby.IsPublic = Plugin.modConfig.lobbyVisibility.Value;
         try
         {
             ZeepkistNetwork.NetworkClient?.SendPacket(new ChangeLobbyVisibilityPacket
             {
-                Visiblity = ZeepkistNetwork.CurrentLobby.IsPublic,
+                Visiblity = ZeepkistNetwork.CurrentLobby.IsPublic
             });
         }
         catch (Exception ex)
         {
             ModLogger.LogError("Unabled exception in ChangeLobbyVisibility: " + ex);
         }
-    }  
-    
+    }
+
     public static void ChangeLobbyInfo()
     {
         ChangeLobbyName();
@@ -164,11 +165,12 @@ public class LobbiesManager{
         ChangeLobbyVisibility();
     }
 
-    public static void ShowdownStart(){
-        ChangeLobbyInfo(); 
+    public static void ShowdownStart()
+    {
+        ChangeLobbyInfo();
         JoinMessage();
         CountdownManager.UpdatingCountDownLeft();
-        LobbyTime(CountdownManager.CountdownLeft+60);
+        LobbyTime(CountdownManager.CountdownLeft + 60);
         CountdownManager.StartCountdown();
     }
 }

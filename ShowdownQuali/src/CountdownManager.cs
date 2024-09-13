@@ -1,19 +1,18 @@
 using System;
 using System.Timers;
-using ShowdownQuali;
 
-public class CountdownManager{
+namespace ShowdownQuali;
+
+public class CountdownManager
+{
     private static Timer countdownTimer;
-    private static int countdownLeft;
-    public static int CountdownLeft
-    {
-        get { return countdownLeft; }
-    }
+
+    public static int CountdownLeft { get; private set; }
 
     public static void StartCountdown()
     {
         ModLogger.LogInfo("Starting countdown");
-        countdownTimer = new Timer(1000); 
+        countdownTimer = new Timer(1000);
         countdownTimer.Elapsed += OnTimedEvent;
         countdownTimer.AutoReset = true;
         countdownTimer.Enabled = true;
@@ -21,17 +20,19 @@ public class CountdownManager{
 
     public static void StopCountdownTimer()
     {
-        if (countdownTimer != null)
+        if (countdownTimer == null)
         {
-            countdownLeft = 0;
-            countdownTimer.Stop();
-            countdownTimer.Dispose();
+            return;
         }
+
+        CountdownLeft = 0;
+        countdownTimer.Stop();
+        countdownTimer.Dispose();
     }
 
     private static void OnTimedEvent(object source, ElapsedEventArgs e)
     {
-        if (countdownLeft > 0)
+        if (CountdownLeft > 0)
         {
             UpdateCountdown();
         }
@@ -46,13 +47,13 @@ public class CountdownManager{
     {
         string formattedTime = GetFormattedTime();
         CommandSenderManager.SetServerMessage(formattedTime);
-        countdownLeft--;
+        CountdownLeft--;
     }
 
     private static string GetFormattedTime()
     {
-        TimeSpan time = TimeSpan.FromSeconds(countdownLeft);
-        int totalHours = (int)time.TotalHours; 
+        TimeSpan time = TimeSpan.FromSeconds(CountdownLeft);
+        int totalHours = (int)time.TotalHours;
         return string.Format("{0:D2}:{1:D2}:{2:D2}", totalHours, time.Minutes, time.Seconds);
     }
 
@@ -65,10 +66,10 @@ public class CountdownManager{
         if (remainingTimeInSeconds < 0)
         {
             ModLogger.LogWarning("The endUnixTimestamp has already passed.");
-            countdownLeft = 0; // If the event has already ended, return 60
+            CountdownLeft = 0; // If the event has already ended, return 60
         }
+
         ModLogger.LogInfo($"Remaining time updated: {remainingTimeInSeconds} seconds");
-        countdownLeft = (int)remainingTimeInSeconds;
+        CountdownLeft = remainingTimeInSeconds;
     }
-    
 }

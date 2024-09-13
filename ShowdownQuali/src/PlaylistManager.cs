@@ -1,13 +1,14 @@
-
 using ZeepkistClient;
-using ZeepkistNetworking;
 using ZeepSDK.Level;
 using ZeepSDK.Multiplayer;
 using ZeepSDK.Playlist;
 
-public class PlaylistManager{
+namespace ShowdownQuali;
 
-    public static void LoadPlaylist(string playlistName){
+public class PlaylistManager
+{
+    public static void LoadPlaylist(string playlistName)
+    {
         PlaylistSaveJSON qualiPlaylist = PlaylistApi.GetPlaylist(playlistName);
         ZeepkistNetwork.CurrentLobby.Playlist = qualiPlaylist.levels;
         ZeepkistNetwork.CurrentLobby.RoundTime = qualiPlaylist.roundLength;
@@ -17,15 +18,19 @@ public class PlaylistManager{
         MultiplayerApi.UpdateServerPlaylist();
     }
 
-    public static bool CompareLevels(string playlistName){
+    public static bool CompareLevels(string playlistName)
+    {
         PlaylistSaveJSON qualiPlaylist = PlaylistApi.GetPlaylist(playlistName);
-        if(qualiPlaylist.levels[0].UID == LevelApi.CurrentZeepLevel.UniqueId){
+        if (qualiPlaylist.levels[0].UID == LevelApi.CurrentZeepLevel.UniqueId)
+        {
             return true;
         }
+
         return false;
     }
 
-    public static void SetHoFIndex(){
+    public static void SetHoFIndex()
+    {
         MultiplayerApi.SetNextLevelIndex(1);
     }
 }

@@ -1,10 +1,12 @@
 using System.Collections;
 using UnityEngine;
 
+namespace ShowdownQuali;
+
 public class CoroutineStarter : MonoBehaviour
 {
-    private Coroutine startedCoroutine;
     private static CoroutineStarter _instance;
+    private Coroutine startedCoroutine;
 
     public static CoroutineStarter Instance
     {
@@ -17,6 +19,7 @@ public class CoroutineStarter : MonoBehaviour
                 _instance = obj.AddComponent<CoroutineStarter>();
                 DontDestroyOnLoad(obj); // Optional: Keeps this object across different scenes
             }
+
             return _instance;
         }
     }
@@ -40,6 +43,7 @@ public class CoroutineStarter : MonoBehaviour
             ModLogger.LogError("CoroutineStarter is not initialized!");
             return;
         }
+
         startedCoroutine = _instance.StartCoroutine(coroutine);
     }
 
@@ -50,6 +54,7 @@ public class CoroutineStarter : MonoBehaviour
             ModLogger.LogError("CoroutineStarter is not initialized!");
             return;
         }
+
         if (startedCoroutine != null)
         {
             _instance.StopCoroutine(startedCoroutine);

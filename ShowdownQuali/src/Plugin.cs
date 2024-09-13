@@ -1,7 +1,5 @@
 ﻿using BepInEx;
 using HarmonyLib;
-using UnityEngine;
-
 
 namespace ShowdownQuali;
 
@@ -9,8 +7,8 @@ namespace ShowdownQuali;
 [BepInDependency("ZeepSDK")]
 public class Plugin : BaseUnityPlugin
 {
-    private Harmony harmony;
     public static ModConfig modConfig;
+    private Harmony harmony;
 
     private void Awake()
     {
@@ -28,10 +26,6 @@ public class Plugin : BaseUnityPlugin
         modConfig.endUnixTimestamp.Value = modConfig.GetTimestampInAdvance(2880);
     }
 
-    
-
-
-    
 
     private void OnDestroy()
     {
