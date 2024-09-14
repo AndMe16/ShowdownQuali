@@ -15,7 +15,7 @@ public class NetworkManager
             SceneManager.LoadScene("3D_MainMenu");
 
             // Wait for 10 seconds before loading the Online Lobby scene
-            yield return new WaitForSeconds(10);
+            yield return new WaitForSeconds(5);
             // Load the Online Lobby scene after the 10-second delay
             SceneManager.LoadScene("Online Lobby");
 
